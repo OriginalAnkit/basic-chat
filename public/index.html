@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyChat</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        name = prompt("Please enter your name");
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        mycolor = getRandomColor();
+
+        const socket = io.connect(window.location.origin)
+
+        socket.on("connect", () => {
+            socket.emit("newmsg", "added");
+        })
+        socket.on("display_msg", (data) => {
+
+            document.querySelector(".message-segement").innerHTML += (`<div class="ui message" style="color:white;background:${data.color};font-weight:bold">
+                <div class="header">
+                 <u>${data.name==name ? "You ":data.name}</u>
+                 </div>
+            <p>${data.data}</p>
+            </div>`)
+        })
+
+
+
+    </script>
+    <style>
+        .main-container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            min-width: 300px;
+        }
+
+        .message-segement {
+            min-height: 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-container">
+        <div class="ui top attached header">
+            <div class="ui action fluid input">
+                <input type="text" placeholder="Enter your message" class="new_msg">
+                <button class="ui button send">Send</button>
+            </div>
+        </div>
+        <div class="ui attached segment message-segement">
+
+        </div>
+    </div>
+    <script>
+        document.querySelector("body").style.backgroundColor = mycolor;
+        document.querySelector(".new_msg").addEventListener("keypress", function (e) {
+            if (e.keyCode == 13) {
+                emitEvent()
+            }
+        })
+
+        document.querySelector(".send").addEventListener("click", function () {
+            emitEvent()
+        })
+
+        function emitEvent() {
+            let msg = document.querySelector(".new_msg").value;
+            socket.emit("new_msg", { data: msg, color: mycolor, name: name })
+        }
+
+    </script>
+</body>
+
+</html>
